@@ -182,6 +182,7 @@ exclude_lines = [
     "if settings.DEBUG",
     "pragma: no cover",
     "raise AssertionError",
+    "if TYPE_CHECKING:",
     "raise NotImplementedError",
     "show_plot",
 ]
