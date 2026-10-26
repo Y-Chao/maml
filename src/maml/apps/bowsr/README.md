@@ -54,6 +54,7 @@ Import the necessary modules:
 from pymatgen.core.structure import Structure
 from pymatgen.core.periodic_table import get_el_sp
 from maml.apps.bowsr.model.megnet import MEGNet
+
 # from maml.apps.bowsr.model.cgcnn import CGCNN
 from maml.apps.bowsr.optimizer import BayesianOptimizer
 ```
@@ -63,7 +64,7 @@ from maml.apps.bowsr.optimizer import BayesianOptimizer
 Instantiate a MEGNet (or CGCNN) model and load a `pymatgen` `Structure` from a CIF file:
 
 ```python
-model = MEGNet() # or `model = CGCNN()`
+model = MEGNet()  # or `model = CGCNN()`
 structure = Structure.from_file("<my-file>.cif")
 ```
 
@@ -71,8 +72,8 @@ We use a helper function for the expected radius based on the sum of radii of tw
 
 ```python
 def expected_cutoff(struct):
-    if struct.composition.num_atoms==1:
-        return 2*struct.composition.elements[0].atomic_radius
+    if struct.composition.num_atoms == 1:
+        return 2 * struct.composition.elements[0].atomic_radius
     return sum([e.atomic_radius for e in sorted(struct.composition.elements, key=lambda x: x.atomic_radius)[:2]])
 ```
 
@@ -82,16 +83,11 @@ Finally, instantiate and run the optimizer:
 
 ```python
 compressed_optimizer = BayesianOptimizer(
-    model=model,
-    structure=structure,
-    relax_coords=True,
-    relax_lattice=True,
-    use_symmetry=True,
-    seed=42
+    model=model, structure=structure, relax_coords=True, relax_lattice=True, use_symmetry=True, seed=42
 )
 
 compressed_optimizer.set_bounds()
-compressed_optimizer.optimize(n_init=100, n_iter=100, alpha=0.026 ** 2)
+compressed_optimizer.optimize(n_init=100, n_iter=100, alpha=0.026**2)
 ```
 
 ## Relaxed Structure

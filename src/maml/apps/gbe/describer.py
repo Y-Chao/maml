@@ -8,10 +8,12 @@ from math import gcd
 import numpy as np
 import pandas as pd
 from monty.json import MSONable
-from pymatgen.analysis.local_env import (
-    BrunnerNN_real,
-    BrunnerNN_reciprocal,
-    BrunnerNN_relative,
+from pymatgen.core import Element, Structure
+from pymatgen.core.interface import GrainBoundary
+from pymatgen.core.local_env import (
+    BrunnerNNReal,
+    BrunnerNNReciprocal,
+    BrunnerNNRelative,
     CovalentBondNN,
     Critic2NN,
     CrystalNN,
@@ -25,8 +27,6 @@ from pymatgen.analysis.local_env import (
     OpenBabelNN,
     VoronoiNN,
 )
-from pymatgen.core import Element, Structure
-from pymatgen.core.interface import GrainBoundary
 from pymatgen.ext.matproj import MPRester, MPRestError
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 
@@ -317,9 +317,9 @@ class GBBond(MSONable):
             CovalentBondNN,
             MinimumVIRENN,
             MinimumOKeeffeNN,
-            BrunnerNN_reciprocal,
-            BrunnerNN_real,
-            BrunnerNN_relative,
+            BrunnerNNReciprocal,
+            BrunnerNNReal,
+            BrunnerNNRelative,
             EconNN,
             CrystalNN,
             CutOffDictNN,
