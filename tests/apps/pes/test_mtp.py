@@ -51,9 +51,9 @@ class MTPotentialTest(unittest.TestCase):
     def test_write_read_cfgs(self):
         self.potential.elements = ["Mo"]
         self.potential.write_cfg("test.cfgs", cfg_pool=self.test_pool)
-        datapool, df = self.potential.read_cfgs("test.cfgs")
+        datapool, _df = self.potential.read_cfgs("test.cfgs")
         assert len(self.test_pool) == len(datapool)
-        for data1, data2 in zip(self.test_pool, datapool):
+        for data1, data2 in zip(self.test_pool, datapool, strict=True):
             struct1 = data1["structure"]
             struct2 = Structure.from_dict(data2["structure"])
             assert struct1 == struct2
@@ -108,7 +108,7 @@ class MTPotentialTest(unittest.TestCase):
             max_dist=3.0,
             max_iter=20,
         )
-        energy, forces, stress = self.potential.predict_efs(self.test_struct)
+        _energy, forces, stress = self.potential.predict_efs(self.test_struct)
         assert len(forces) == len(self.test_struct)
         assert len(stress) == 6
 

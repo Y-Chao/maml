@@ -159,11 +159,13 @@ lint.ignore = [
 lint.pydocstyle.convention = "google"
 lint.isort.required-imports = ["from __future__ import annotations"]
 lint.isort.split-on-trailing-comma = false
-exclude = ["tests", "tasks.py", "api-docs-source"]
+exclude = ["tasks.py", "api-docs-source"]
 
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401"]
-"*/tests/*" = ["D"]
+# PT009/PT027: unittest-style asserts remain in TestCase-based tests.
+"tests/**" = ["D", "PT009", "PT027"]
+"*/tests/*" = ["D", "PT009", "PT027"]
 "tasks.py" = ["D"]
 
 [tool.pytest.ini_options]
@@ -180,9 +182,9 @@ exclude_lines = [
     "if __name__ == .__main__.:",
     "if self.debug:",
     "if settings.DEBUG",
+    "if TYPE_CHECKING:",
     "pragma: no cover",
     "raise AssertionError",
-    "if TYPE_CHECKING:",
     "raise NotImplementedError",
     "show_plot",
 ]
@@ -201,7 +203,7 @@ ignore_missing_imports = true
 ignore-words-list = """
 titel,alls,ans,nd,mater,nwo,te,hart,ontop,ist,ot,fo,nax,coo,coul,ser,leary,thre,
 fase,rute,reson,titels,ges,scalr,strat,struc,hda,nin,ons,pres,kno,loos,lamda,lew,
-equil
+equil,sav
 """
-skip = "pymatgen/analysis/aflow_prototypes.json"
+skip = "pymatgen/analysis/aflow_prototypes.json,*.ipynb"
 check-filenames = true

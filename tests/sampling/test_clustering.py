@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import numpy as np
-
 from maml.sampling.clustering import BirchClustering
 
 
@@ -15,9 +13,9 @@ class TestBirchClustering:
 
     def test_transform(self, Birch_results, PC_weighted):
         clustering_results = self.Birch.transform(PC_weighted)
-        assert "labels" in clustering_results.keys()
-        assert "label_centers" in clustering_results.keys()
-        assert "PCAfeatures" in clustering_results.keys()
+        assert "labels" in clustering_results
+        assert "label_centers" in clustering_results
+        assert "PCAfeatures" in clustering_results
         assert (clustering_results["labels"] == Birch_results["labels"]).all()
         assert all(
             ((clustering_results["label_centers"].get(k) == v).all() for k, v in Birch_results["label_centers"].items())

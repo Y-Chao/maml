@@ -118,7 +118,7 @@ class SNAPotentialTest(unittest.TestCase):
             train_forces=self.test_forces,
             train_stresses=self.test_stresses,
         )
-        energy, forces, stress = self.potential1.predict_efs(self.test_struct)
+        _energy, forces, stress = self.potential1.predict_efs(self.test_struct)
         assert len(forces) == len(self.test_struct)
         assert len(stress) == 6
         self.potential2.train(
@@ -127,7 +127,7 @@ class SNAPotentialTest(unittest.TestCase):
             train_forces=self.test_forces,
             train_stresses=self.test_stresses,
         )
-        energy, forces, stress = self.potential2.predict_efs(self.test_struct)
+        _energy, forces, stress = self.potential2.predict_efs(self.test_struct)
         assert len(forces) == len(self.test_struct)
         assert len(stress) == 6
 

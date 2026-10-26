@@ -40,12 +40,12 @@ class ElementStatsTest(unittest.TestCase):
         res3 = test.transform([dummy_h2o, dummy_h2o])
         np.testing.assert_allclose(res.values, res3.values)
 
-        stats = ["min", "max", *["moment:%d:None" % i for i in range(1, 11)]]
-        p0_names = ["p0_%s" % i for i in stats]
-        p1_names = ["p1_%s" % i for i in stats]
-        p2_names = ["p2_%s" % i for i in stats]
+        stats = ["min", "max", *[f"moment:{i}:None" for i in range(1, 11)]]
+        p0_names = [f"p0_{i}" for i in stats]
+        p1_names = [f"p1_{i}" for i in stats]
+        p2_names = [f"p2_{i}" for i in stats]
         all_names = []
-        for i, j, k in zip(p0_names, p1_names, p2_names):
+        for i, j, k in zip(p0_names, p1_names, p2_names, strict=True):
             all_names.extend([i, j, k])
 
         self.assertListEqual(list(res.columns), all_names)
@@ -64,26 +64,26 @@ class ElementStatsTest(unittest.TestCase):
         assert d.shape == (1, 160)
 
     def test_error(self):
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError, match="Property length not consistent"):
             _ = ElementStats(element_properties={"H": [1, 2], "O": [1, 2, 3]}, stats=["mean"])
 
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError, match="Property name length is not consistent"):
             _ = ElementStats(element_properties={"H": [1, 2], "O": [1, 2]}, stats=["mean"], property_names=["p1"])
 
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError, match="super_std not in available Stats"):
             _ = ElementStats(
                 element_properties={"H": [1, 2], "O": [1, 2]}, stats=["super_std"], property_names=["p1", "p2"]
             )
 
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError, match="super_std not in available Stats"):
             _ = ElementStats(
                 element_properties={"H": [1, 2], "O": [1, 2]}, stats=["super_std:-1"], property_names=["p1", "p2"]
             )
 
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError, match="File is not in correct format"):
             ElementStats.from_file(os.path.join(CWD, "test_data/wrong_dummy_property.json"), stats=["max"])
 
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError, match="Data name not found"):
             ElementStats.from_data("megnet_22", stats=["max"])
 
     def test_keys(self):

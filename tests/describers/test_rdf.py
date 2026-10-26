@@ -39,13 +39,13 @@ class TestRDF(PymatgenTest):
         assert self.structure.lattice.a * np.sqrt(2) / 2.0 == pytest.approx(r[np.argmax(rdf)], 2)
 
     def test_get_site_cn(self):
-        r, cns = self.rdf_instance.get_site_coordination(self.structure)
+        _r, cns = self.rdf_instance.get_site_coordination(self.structure)
         assert cns[0]["Sr2+:O2-"][-1].item() == pytest.approx(12)
         assert cns[0]["Sr2+:Ti4+"][-1].item() == pytest.approx(8)
         assert cns[0]["Sr2+:Sr2+"][-1].item() == pytest.approx(6)
 
     def test_get_specie_cn(self):
-        r, cn = self.rdf_instance.get_species_coordination(self.structure)
+        _r, cn = self.rdf_instance.get_species_coordination(self.structure)
         assert cn[-1] == 106
 
 

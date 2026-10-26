@@ -25,8 +25,8 @@ jobs:
     - name: ruff
       run: |
         uv run ruff --version
-        uv run ruff check src
-        uv run ruff format src --check
+        uv run ruff check src tests
+        uv run ruff format src tests --check
 
     - name: mypy
       run: |

@@ -26,14 +26,14 @@ class WyckoffPerturbationTest(unittest.TestCase):
         lfpo_sd = lfpo_sa.get_symmetry_dataset()
         lfpo_symm_ops = [
             SymmOp.from_rotation_and_translation(rotation, translation, tol=0.1)
-            for rotation, translation in zip(lfpo_sd["rotations"], lfpo_sd["translations"])
+            for rotation, translation in zip(lfpo_sd["rotations"], lfpo_sd["translations"], strict=True)
         ]
         self.test_refined_lco = get_standardized_structure(test_lco)
         lco_sa = SpacegroupAnalyzer(self.test_refined_lco)
         lco_sd = lco_sa.get_symmetry_dataset()
         lco_symm_ops = [
             SymmOp.from_rotation_and_translation(rotation, translation, tol=0.1)
-            for rotation, translation in zip(lco_sd["rotations"], lco_sd["translations"])
+            for rotation, translation in zip(lco_sd["rotations"], lco_sd["translations"], strict=True)
         ]
         self.wp1 = WyckoffPerturbation(62, wyckoff_symbol="a", symmetry_ops=lfpo_symm_ops)
         self.wp2 = WyckoffPerturbation(62, wyckoff_symbol="c", symmetry_ops=lfpo_symm_ops)

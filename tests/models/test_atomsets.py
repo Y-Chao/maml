@@ -17,10 +17,8 @@ from maml.models.dl._atomsets import construct_atom_sets
 
 class TestAtomSets(TestCase):
     def test_predict(self):
-        x = np.array([[0, 1, 0, 1, 0, 1]], dtype=np.int32).reshape((1, -1))
         x_vec = np.random.normal(size=(1, 6, 20))
         indices = np.array([[0, 0, 0, 1, 1, 1]], dtype=np.int32).reshape((1, -1))
-        y = np.array([[0.1, 0.2]]).reshape((1, 2, 1))
 
         model1 = AtomSets(
             describer=SiteElementProperty(),

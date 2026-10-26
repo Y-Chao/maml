@@ -3,7 +3,6 @@ from __future__ import annotations
 import os
 import shutil
 import unittest
-from types import SimpleNamespace
 from unittest.mock import create_autospec
 
 import numpy as np

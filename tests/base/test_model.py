@@ -42,7 +42,6 @@ class TestBaseModel(unittest.TestCase):
         y = np.array([3, 7]).reshape((-1, 1))
         model.fit(x, y)
         model.train(x, y)
-        x_test = np.array([[4, 5]])
         model.model.set_weights([np.array([[1.0], [1.0]]), np.array([0])])
         self.assertAlmostEqual(model.predict_objs(np.array([[4, 5]]))[0], 9)
 

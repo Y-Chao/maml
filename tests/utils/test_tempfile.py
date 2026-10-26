@@ -21,7 +21,7 @@ class TestMultiScratchDir(unittest.TestCase):
                     os.system("touch tempfile")
                     os.chdir("..")
             tempfiles = set(glob("tempfile*"))
-            assert {("tempfile_%d" % i) for i in range(4)} == tempfiles
+            assert {f"tempfile_{i}" for i in range(4)} == tempfiles
 
 
 def test_multi_scratch_dir_copy_and_symlink(tmp_path, monkeypatch):

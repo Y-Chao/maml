@@ -13,11 +13,10 @@ import types
 
 import numpy as np
 import pytest
+import torch
 from pymatgen.core import Lattice, Structure
 
 import maml.apps.bowsr.model.cgcnn as cgcnn_module
-
-torch = pytest.importorskip("torch")
 
 
 class FakeGaussianDistance:

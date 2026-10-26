@@ -49,9 +49,9 @@ class GAPotentialTest(unittest.TestCase):
 
     def test_write_read_cfgs(self):
         self.potential.write_cfgs("test.xyz", cfg_pool=self.test_pool)
-        datapool, df = self.potential.read_cfgs("test.xyz")
+        datapool, _df = self.potential.read_cfgs("test.xyz")
         assert len(self.test_pool) == len(datapool)
-        for data1, data2 in zip(self.test_pool, datapool):
+        for data1, data2 in zip(self.test_pool, datapool, strict=True):
             struct1 = data1["structure"]
             struct2 = Structure.from_dict(data2["structure"])
             assert struct1 == struct2
@@ -100,7 +100,7 @@ class GAPotentialTest(unittest.TestCase):
             train_forces=self.test_forces,
             train_stresses=self.test_stresses,
         )
-        energy, forces, stress = self.potential.predict_efs(self.test_struct)
+        _energy, forces, stress = self.potential.predict_efs(self.test_struct)
         assert len(forces) == len(self.test_struct)
         assert len(stress) == 6
 
