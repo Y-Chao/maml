@@ -104,8 +104,8 @@ class SIS:
 
     def screen(self, x, y):
         """
-        Simple screening method by comparing the correlation between features
-        and the target.
+        Simple screening method by ranking features on the magnitude of their
+        correlation with the target, |x^T y| (eq. 2 in Fan & Lv).
 
         Args:
             x (np.ndarray): input array
@@ -116,7 +116,7 @@ class SIS:
         """
         n = x.shape[1]
         omega = x.T.dot(y)
-        sorted_omega = np.argsort(omega)[::-1]
+        sorted_omega = np.argsort(np.abs(omega))[::-1]
         d = int(n * self.gamma)
         return sorted_omega[:d]
 
@@ -183,7 +183,7 @@ class ISIS:
             l0_regulate(bool): Whether to regulate features in each iteration, default True.
         """
         self.sis = sis if sis is not None else SIS(gamma=0.1, selector=DantzigSelector(0.1))
-        self.selector = sis.selector  # type: ignore
+        self.selector = self.sis.selector
         self.l0_regulate = l0_regulate
         self.coeff = []  # type: ignore
         self.find_sel = []  # type: ignore
@@ -219,19 +219,24 @@ class ISIS:
         self.coeff = _get_coeff(x[:, find_sel], y)
 
         if len(find_sel) >= max_p:
-            self.coeff = _get_coeff(x[:, find_sel[:max_p]], y)
-            return find_sel[:max_p]
+            self.find_sel = find_sel[:max_p]
+            self.coeff = _get_coeff(x[:, self.find_sel], y)
+            return self.find_sel
         new_findex = np.array(list(set(findex) - set(find_sel)))
         new_y = self.sis.compute_residual(x, y)
         new_x = x[:, new_findex]
         while len(find_sel) < max_p:
             find_sel_new: list[int] = []
-            try:
-                find_sel_new = self.sis.run(new_x, new_y, options)
-            except ValueError:
-                while len(find_sel_new) == 0:
+            while len(find_sel_new) == 0:
+                try:
+                    find_sel_new = self.sis.run(new_x, new_y, options)
+                except ValueError:
+                    # screening kept no features (gamma * n < 1), so the selector had nothing to fit
+                    find_sel_new = []
+                if len(find_sel_new) == 0:
+                    if self.sis.gamma >= 1:
+                        raise RuntimeError("SIS selected no features even with all features screened in.")
                     self.sis.update_gamma(step)
-                    find_sel_new = self.sis.run(new_x, new_y)
             if self.l0_regulate:
                 find_sel, _, _ = _best_combination(x, y, find_sel, new_findex[find_sel_new], metric)
             else:

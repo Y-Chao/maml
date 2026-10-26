@@ -5,6 +5,8 @@ using the cvxpy package.
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import numpy as np
 from monty.dev import requires
 from scipy.linalg import lstsq
@@ -13,25 +15,29 @@ from maml.apps.symbolic._selectors import BaseSelector
 
 try:
     import cvxpy as cp
-
-    Expression = cp.expressions.expression.Expression
 except ImportError:
-    cp = None
-    Expression = "Expression"
+    cp = None  # type: ignore[assignment]
+
+if TYPE_CHECKING:
+    from cvxpy.constraints.constraint import Constraint
+    from cvxpy.expressions.expression import Expression
 
 
 class BaseSelectorCP(BaseSelector):
     """Base selector using cvxpy (CP)."""
 
     @requires(cp is not None, "cvxpy is not present.")
-    def __init__(self, coef_thres: float = 1e-6, method: str = "ECOS"):
+    def __init__(self, coef_thres: float = 1e-6, method: str | None = None):
         """
         Base selector
         Args:
             coef_thres (float): threshold to discard certain coefficients
-            method (str): solver for cvxpy problem. The default is ECOS.
+            method (str | None): solver for cvxpy problem, e.g. "CLARABEL" or "SCS".
+                The default (None) lets cvxpy pick an installed solver. ECOS is no
+                longer bundled with cvxpy >= 1.6, so it must be installed separately
+                to be requested.
         """
-        super().__init__(coef_thres=coef_thres, method=method)
+        super().__init__(coef_thres=coef_thres, method=method)  # type: ignore[arg-type]
 
     # pylint: disable=E1128
     def select(self, x: np.ndarray, y: np.ndarray, options: dict | None = None) -> np.ndarray | None:
@@ -42,6 +48,9 @@ class BaseSelectorCP(BaseSelector):
             y (np.ndarray): M output targets
             options (dict): kwargs for cp.Problem.solve
         Returns: list of int indices.
+
+        Raises:
+            RuntimeError: if cvxpy does not find an optimal solution.
         """
         options = options or {}
         _n, p = x.shape
@@ -50,6 +59,9 @@ class BaseSelectorCP(BaseSelector):
         constraints = self.construct_constraints(x, y, beta)
         prob = cp.Problem(objective, constraints)
         prob.solve(solver=self.method, **options)
+        if prob.status not in (cp.OPTIMAL, cp.OPTIMAL_INACCURATE) or beta.value is None:
+            raise RuntimeError(f"Not converged, status {prob.status}")
+        self.is_fitted = True
         self.coef_ = beta.value
         self.indices = np.where(np.abs(beta.value) > self.coef_thres)[0]
         self.coef_[np.where(np.abs(self.coef_) <= self.coef_thres)[0]] = 0.0  # type: ignore
@@ -57,7 +69,7 @@ class BaseSelectorCP(BaseSelector):
 
     def construct_constraints(
         self, x: np.ndarray, y: np.ndarray, beta: cp.Variable | None = None
-    ) -> list[Expression] | None:  # type: ignore
+    ) -> list[Constraint] | None:
         """
         Get constraints dictionary from data, e.g.,
         {"func": lambda beta: fun(x, y, beta), "type": "ineq"}.
@@ -114,7 +126,7 @@ class DantzigSelectorCP(BaseSelectorCP):
 
     def construct_constraints(
         self, x: np.ndarray, y: np.ndarray, beta: cp.Variable | None = None
-    ) -> list[Expression] | None:  # type: ignore
+    ) -> list[Constraint] | None:
         """
         Dantzig selector constraints
         Args:
