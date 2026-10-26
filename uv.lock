@@ -1971,10 +1971,12 @@ version = "2025.4.3"
 source = { editable = "." }
 dependencies = [
     { name = "matgl" },
+    { name = "monty" },
     { name = "mp-api" },
     { name = "numpy", version = "2.4.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.12'" },
     { name = "numpy", version = "2.5.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
     { name = "pymatgen" },
+    { name = "pymatgen-core" },
     { name = "scikit-learn" },
     { name = "scipy", version = "1.17.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.12'" },
     { name = "scipy", version = "1.18.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
@@ -2015,10 +2017,12 @@ maintain = [
 [package.metadata]
 requires-dist = [
     { name = "cvxpy", marker = "extra == 'symbolic'" },
-    { name = "matgl", specifier = ">=3.0.3" },
+    { name = "matgl", specifier = ">=4.1.1" },
+    { name = "monty", specifier = ">=2026.10.21" },
     { name = "mp-api" },
     { name = "numpy" },
-    { name = "pymatgen" },
+    { name = "pymatgen", specifier = ">=2026.10.24" },
+    { name = "pymatgen-core", specifier = ">=2026.10.16" },
     { name = "scikit-learn", specifier = ">=1.6.1" },
     { name = "scipy" },
     { name = "tensorflow", marker = "extra == 'deep'", specifier = ">=2" },
@@ -2029,7 +2033,7 @@ provides-extras = ["symbolic", "deep"]
 dev = [
     { name = "coverage", specifier = ">=7.7.1" },
     { name = "coveralls", specifier = ">=4.0.1" },
-    { name = "matgl", specifier = ">=3.0.3" },
+    { name = "matgl", specifier = ">=4.1.1" },
     { name = "pre-commit", specifier = ">=4.2.0" },
     { name = "pymongo", specifier = ">=4.19.0" },
     { name = "pytest", specifier = ">=8.3.5" },
@@ -3655,14 +3659,14 @@ wheels = [
 
 [[package]]
 name = "pymatgen"
-version = "2026.5.4"
+version = "2026.10.24"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pymatgen-core" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/0c/a1/727feae7083bb3b10ba9d43ccbbe83317d4654957a08cee52096ef86bfde/pymatgen-2026.5.4.tar.gz", hash = "sha256:4998d6084da72224c8025dc1e9645b2aab73896109a7ef1e05bd479a25a55b79", size = 743199, upload-time = "2026-05-04T22:03:24.675Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/64/42/a2441cdc5c6ab009821350f0ee427d116449970d010a6553d087b557de1f/pymatgen-2026.10.24.tar.gz", hash = "sha256:4a150905fe12e9f087e47647a6f18b898d778e21228c8233571f70e4803964f0", size = 782589, upload-time = "2026-10-23T23:04:15.763Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/a2/3a/de29b0b6c1740098c3ccdd3fa69336dc39b5efc6840a55e30dcaea01a19b/pymatgen-2026.5.4-py3-none-any.whl", hash = "sha256:7815cd4310c6d5a465b0da14a1633479cf61366676e62764db17f7e2a20d1974", size = 829056, upload-time = "2026-05-04T22:03:22.327Z" },
+    { url = "https://files.pythonhosted.org/packages/4a/f0/0207ab3a15f86200f4fe798eb0f05eab0237380d8574b0d9f1ee107bc875/pymatgen-2026.10.24-py3-none-any.whl", hash = "sha256:bd341f2e0550ec38358de2c95a65cabd9f1efa433df48ed5b615cc2d0115d827", size = 829702, upload-time = "2026-10-23T22:39:14.807Z" },
 ]
 
 [[package]]

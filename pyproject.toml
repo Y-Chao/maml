@@ -45,10 +45,12 @@ classifiers = [
 dependencies = [
     "numpy",
     "scipy",
-    "pymatgen",
+    "pymatgen>=2026.10.24",
+    "pymatgen-core>=2026.10.16",
+    "monty>=2026.10.21",
     "mp-api",
     "scikit-learn>=1.6.1",
-    "matgl>=3.0.3"
+    "matgl>=4.1.1"
 ]
 version = "2025.4.3"
 
@@ -64,7 +66,7 @@ dev = [
     "pytest>=8.3.5",
     "pytest-cov>=6.0.0",
     "tensorflow>=2.18.1",
-    "matgl>=3.0.3",
+    "matgl>=4.1.1",
     "pre-commit>=4.2.0",
     "pymongo>=4.19.0",
 ]
