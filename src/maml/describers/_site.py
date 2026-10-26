@@ -141,18 +141,23 @@ class BispectrumCoefficients(BaseDescriber):
 
     @property
     def feature_dim(self) -> int | None:
-        """Bispectrum feature dimension."""
+        """
+        Bispectrum feature dimension, i.e., the number of columns returned by transform_one.
+
+        Per-atom features have n_bs (+ n_bs * (n_bs + 1) / 2 if quadratic) columns. With pot_fit, the
+        features (plus the atom count column "n") are resolved per element.
+        """
         n = 0
         for i in range(self.twojmax + 1):
             for j in range(i + 1):
                 for k in range(j - i, min(self.twojmax, i + j) + 1, 2):
                     if k >= i:
                         n += 1
-        if self.pot_fit:
-            n += 1
-        n_elements = len(self.elements)
-        n *= n_elements
-        return n
+        if self.quadratic:
+            n += n * (n + 1) // 2
+        if not self.pot_fit:
+            return n
+        return (n + 1) * len(self.elements)
 
 
 @describer_type("site")
@@ -205,7 +210,7 @@ class SmoothOverlapAtomicPosition(BaseDescriber):
         """
         if not which("quip"):
             raise RuntimeError(
-                "quip has not been found.\n", "Please refer to https://github.com/libAtoms/QUIP for ", "further detail."
+                "quip has not been found.\nPlease refer to https://github.com/libAtoms/QUIP for further detail."
             )
 
         atoms_filename = "structure.xyz"
@@ -235,20 +240,22 @@ class SmoothOverlapAtomicPosition(BaseDescriber):
             _ = self.operator.write_cfgs(filename=atoms_filename, cfg_pool=pool_from([structure]))
             descriptor_output = "output"
             with open(descriptor_output, "w") as f, subprocess.Popen(exe_command, stdout=f) as p:
-                stdout = p.communicate()[0]
+                p.communicate()
                 rc = p.returncode
-            if rc != 0:
-                error_msg = f"quip/soap exited with return code {rc}"
-                msg = stdout.decode("utf-8").split("\n")[:-1]
-                try:
-                    error_line = next(i for i, m in enumerate(msg) if m.startswith("ERROR"))
-                    error_msg += ", ".join(msg[error_line:])
-                except Exception:
-                    error_msg += msg[-1]
-                raise RuntimeError(error_msg)
 
+            # stdout is redirected to the output file, so both descriptors and errors are read from it.
             with zopen(descriptor_output, "rt") as f:  # type: ignore
                 lines = f.read()
+
+            if rc != 0:
+                error_msg = f"quip/soap exited with return code {rc}"
+                msg = lines.splitlines()
+                error_line = next((i for i, m in enumerate(msg) if m.startswith("ERROR")), None)
+                if error_line is not None:
+                    error_msg += ": " + ", ".join(msg[error_line:])
+                elif msg:
+                    error_msg += ": " + msg[-1]
+                raise RuntimeError(error_msg)
 
             descriptor_pattern = re.compile("DESC(.*?)\n", re.S)
             return pd.DataFrame([np.array(c.split(), dtype=np.float64) for c in descriptor_pattern.findall(lines)])
