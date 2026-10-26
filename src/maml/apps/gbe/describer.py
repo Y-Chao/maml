@@ -8,6 +8,7 @@ from math import gcd
 import numpy as np
 import pandas as pd
 from monty.json import MSONable
+from mp_api.client import MPRester as MPAPIRester
 from pymatgen.core import Element, Structure
 from pymatgen.core.interface import GrainBoundary
 from pymatgen.core.local_env import (
@@ -205,7 +206,9 @@ def get_structural_feature(db_entry: dict, features: list | None = None) -> pd.D
     rotation_axis = db_entry["rotation_axis"]
     if gb_plane.shape[0] == 4:
         gb_plane = convert_hcp_plane(list(gb_plane))
-        rotation_axis = convert_hcp_direction(rotation_axis, lat_type=sg.get_crystal_system())
+        # Miller-Bravais indices refer to the hexagonal setting, which trigonal crystals also use in bulk_conv.
+        lat_type = "hexagonal" if bulk_conv.lattice.is_hexagonal() else sg.get_lattice_type()
+        rotation_axis = convert_hcp_direction(rotation_axis, lat_type=lat_type)
     d_gb = bulk_conv.lattice.d_hkl(gb_plane)  # type: ignore[arg-type]
     d_rot = bulk_conv.lattice.d_hkl(rotation_axis)
     theta = db_entry["rotation_angle"]
@@ -220,6 +223,20 @@ def get_structural_feature(db_entry: dict, features: list | None = None) -> pd.D
         else:
             fvalues.append(locals()[f"{f.str_name}"])
     return pd.DataFrame([fvalues], columns=[f.str_name for f in features])
+
+
+def _get_cohesive_energy(mp_id: str, mp_api: str) -> float:
+    """
+    Cohesive energy (eV/atom, positive for bound solids) from mp_api.
+
+    The MP summary doc has no cohesive energy, so mp_api computes it from the lowest-energy
+    calculation and isolated-atom reference energies, which it fetches through MPContribs.
+    """
+    with MPAPIRester(mp_api) as mpr:
+        if mpr.contribs is None:
+            raise ImportError("Cohesive energies require the MPContribs client. Install with `pip install maml[gbe]`.")
+        # mp_api returns E_bulk - E_atoms (negative); the GB model uses the positive convention.
+        return -mpr.get_cohesive_energy([mp_id], normalization="atom")[mp_id]
 
 
 def get_elemental_feature(
@@ -266,15 +283,16 @@ def get_elemental_feature(
         rester = MPRester(mp_api)
     else:
         raise MPRestError("Please provide API key to access Materials Project")
-    bulk = rester.materials.search(material_ids=[db_entry["material_id"]])[0]  # type: ignore[attr-defined]
-    bulk_s = rester.get_structure_by_material_id(db_entry["material_id"])  # type: ignore[attr-defined]
-    if bulk:
-        f_dict[preset.bdensity.str_name] = bulk[0]["density"]
-        f_dict[preset.G.str_name] = bulk[0]["elasticity"]["G_VRH"]
+    mp_id = db_entry["material_id"]
+    doc = rester.get_summary_by_material_id(mp_id, fields=["density", "shear_modulus"])
+    bulk_s = rester.get_structure_by_material_id(mp_id)
+    f_dict[preset.bdensity.str_name] = doc["density"]
+    f_dict[preset.G.str_name] = (doc.get("shear_modulus") or {}).get("vrh")
     el = Element(db_entry["pretty_formula"])
     f_dict[preset.ar.str_name] = el.atomic_radius
     f_dict[preset.a0.str_name] = bulk_s.lattice.a
-    f_dict[preset.e_coh.str_name] = rester.get_cohesive_energy(db_entry["material_id"])  # type: ignore[attr-defined,misc]
+    if preset.e_coh in features:
+        f_dict[preset.e_coh.str_name] = _get_cohesive_energy(mp_id, mp_api)
     f_dict[preset.hb.str_name] = el.brinell_hardness
     f_dict[preset.CLTE.str_name] = el.coefficient_of_linear_thermal_expansion
 
@@ -363,17 +381,25 @@ class GBBond(MSONable):
             1. bm[i][j] = bond length between atom i&j
             if i & j is bonded (determined by the loc_algo)
             2. bm[i][j] = bm[j][i]
-            3. If not bonded, the bm[i][j] = np.nan
+            3. If not bonded, the bm[i][j] = 0
 
         """
         if isinstance(gb, dict):
             gb = GrainBoundary.from_dict(gb)
+        # Find neighbors on a copy with frac coords wrapped into [0, 1); GBs often have coords of ~-1e-16,
+        # which break VoronoiNN. Bond lengths are still taken from the original gb.
+        wrapped = Structure(
+            gb.lattice,
+            gb.species_and_occu,
+            np.mod(np.round(gb.frac_coords, 10), 1.0),
+            site_properties=gb.site_properties,
+        )
         bond_mat = np.zeros((gb.num_sites, gb.num_sites))
-        all_nn_info = self.loc_algo.get_all_nn_info(gb)
+        all_nn_info = self.loc_algo.get_all_nn_info(wrapped)
         for i, _ in enumerate(gb.sites):
             # compute the all_nn_info first then call
             # the protected function is faster for multiple computation
-            nn = self.loc_algo._get_nn_shell_info(structure=gb, site_idx=i, shell=1, all_nn_info=all_nn_info)
+            nn = self.loc_algo._get_nn_shell_info(structure=wrapped, site_idx=i, shell=1, all_nn_info=all_nn_info)
             for b in nn:
                 bl = gb.get_distance(i, b["site_index"])
                 bond_mat[i][b["site_index"]] = bl
@@ -399,10 +425,12 @@ class GBBond(MSONable):
             shorter_bond: # of short bonds
             longer_bond: # of long bonds
         """
-        if not self.bond_mat:
-            self._get_bond_mat(gb)
-        long_bond = (self.bond_mat > b0).sum()
-        short_bond = (self.bond_mat < b0).sum()
+        if self.bond_mat is None:
+            self.bond_mat = self._get_bond_mat(gb)
+        # Unbonded pairs are stored as 0 in bond_mat; only count actual bonds.
+        bonds = self.bond_mat[self.bond_mat > 0]
+        long_bond = (bonds > b0).sum()
+        short_bond = (bonds < b0).sum()
         ratio = short_bond / long_bond if long_bond else 0
         if return_count:
             return ratio, short_bond, long_bond
