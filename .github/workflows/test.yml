@@ -25,6 +25,10 @@ jobs:
         python-version: ["3.11", "3.12"]
 
     runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+      # For tokenless Codecov upload via OIDC
+      id-token: write
     env:
       PMG_MAPI_KEY: ${{ secrets.PMG_MAPI_KEY }}
 
@@ -46,7 +50,7 @@ jobs:
       if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
       uses: codecov/codecov-action@v6
       with:
-        token: ${{ secrets.CODECOV_TOKEN }}
+        use_oidc: true
         files: ./coverage.xml
         slug: materialyzeai/maml
         fail_ci_if_error: ${{ github.event_name != 'pull_request' }}
