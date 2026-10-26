@@ -1,20 +1,20 @@
-<img src="https://github.com/materialsvirtuallab/maml/blob/master/resources/logo_horizontal.png?raw=true" alt="maml" width="50%">
+<img src="https://github.com/materialyzeai/maml/blob/main/resources/logo_horizontal.png?raw=true" alt="maml" width="50%">
 
-[![GitHub license](https://img.shields.io/github/license/materialsvirtuallab/maml)](https://github.com/materialsvirtuallab/maml/blob/main/LICENSE)
-[![Linting](https://github.com/materialsvirtuallab/maml/workflows/Linting/badge.svg)](https://github.com/materialsvirtuallab/maml/workflows/Linting/badge.svg)
-[![Testing](https://github.com/materialsvirtuallab/maml/workflows/Testing/badge.svg)](https://github.com/materialsvirtuallab/maml/workflows/Testing/badge.svg)
-[![Downloads](https://pepy.tech/badge/maml)](https://pepy.tech/project/maml)
-[![codecov](https://codecov.io/gh/materialsvirtuallab/maml/branch/master/graph/badge.svg?token=QNL1CRLVVL)](https://codecov.io/gh/materialsvirtuallab/maml)
+[![GitHub license](https://img.shields.io/github/license/materialyzeai/maml)](https://github.com/materialyzeai/maml/blob/main/LICENSE)
+[![Linting](https://github.com/materialyzeai/maml/actions/workflows/lint.yml/badge.svg)](https://github.com/materialyzeai/maml/actions/workflows/lint.yml)
+[![Testing](https://github.com/materialyzeai/maml/actions/workflows/test.yml/badge.svg)](https://github.com/materialyzeai/maml/actions/workflows/test.yml)
+[![Downloads](https://static.pepy.tech/badge/maml)](https://pepy.tech/projects/maml)
+[![codecov](https://codecov.io/gh/materialyzeai/maml/branch/main/graph/badge.svg)](https://codecov.io/gh/materialyzeai/maml)
 
 maml (MAterials Machine Learning) is a Python package that aims to provide useful high-level interfaces that make ML
 for materials science as easy as possible.
 
 The goal of maml is not to duplicate functionality already available in other packages. maml relies on well-established
 packages such as scikit-learn and tensorflow for implementations of ML algorithms, as well as other materials science
-packages such as [pymatgen](http://pymatgen.org) and [matminer](http://hackingmaterials.lbl.gov/matminer/) for
+packages such as [pymatgen](https://pymatgen.org) and [matminer](https://hackingmaterials.lbl.gov/matminer/) for
 crystal/molecule manipulation and feature generation.
 
-Official documentation at https://materialsvirtuallab.github.io/maml/
+Official documentation at https://materialyzeai.github.io/maml/
 
 # Features
 
@@ -75,12 +75,12 @@ pip install -r requirements.txt
 
 # Usage
 
-Many Jupyter notebooks are available on usage. See [notebooks](https://github.com/materialsvirtuallab/maml/tree/master/notebooks). We also have a tool and tutorial lecture
+Many Jupyter notebooks are available on usage. See [notebooks](https://github.com/materialyzeai/maml/tree/main/notebooks). We also have a tool and tutorial lecture
 at [nanoHUB](https://nanohub.org/resources/maml).
 
 # API documentation
 
-See [API docs](https://materialsvirtuallab.github.io/maml/maml.html).
+See [API docs](https://materialyzeai.github.io/maml/maml.html).
 
 # Citing
 
@@ -92,7 +92,7 @@ See [API docs](https://materialsvirtuallab.github.io/maml/maml.html).
     year = {2020},
     publisher = {GitHub},
     journal = {GitHub repository},
-    howpublished = {\url{https://github.com/materialsvirtuallab/maml}},
+    howpublished = {\url{https://github.com/materialyzeai/maml}},
 }
 ```
 
